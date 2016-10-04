@@ -1,0 +1,8 @@
+age,population,description
+<5,2704659,below-5-years-critical
+5-13,4499890,between-5-to-13-years
+14-17,2159981,between-14-to-17-years
+18-24,3853788,between-18-to-24-years
+25-44,14106543,between-25-to-44-years
+45-64,8819342,between-45-to-64-years
+≥65,612463,65-years-and-above

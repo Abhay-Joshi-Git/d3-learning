@@ -1,0 +1,7 @@
+.tooltip-container {
+    position: absolute;
+    height: 200px;
+    width: 200px;
+    color: black;
+    opacity: 0;    
+}
