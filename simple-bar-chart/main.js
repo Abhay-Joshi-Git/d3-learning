@@ -11,28 +11,39 @@ const margin = {
 const width = totalWidth - margin.left - margin.right;
 const height = totalHeight - margin.top - margin.bottom;
 
-var scaleX = d3.scale.ordinal()
-	.rangeRoundBands([0, width], 0.1);
+var scaleX = d3.scale.ordinal();
+
 var scaleY = d3.scale.linear()
 	.range([height, 0]);
 
-var axisX = d3.svg.axis()
-	.scale(scaleX);
-var axisY = d3.svg.axis()
-	.scale(scaleY)
-	.ticks(10, '%')
-	.orient('left');
 
 var svg = d3.select('body').append('svg')
 	.attr('height', totalHeight)
-	.attr('width', totalWidth);
+	.attr('width', 900);
 
 var innerArea = svg.append('g')
 	.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
 function plotChart(error, data) {	
+	var barXMargin = 4;
+	var barWidth = (width - (barXMargin * data.length) - barXMargin) / data.length;
+
+	
 	scaleY.domain(d3.extent(data, d => d.frequency));
-	scaleX.domain(data.map(d => d.letter));
+	scaleX
+		.domain(data.map(d => d.letter))
+		.range(data.map((d, i) => (barXMargin + i * (barWidth+barXMargin))));
+
+	var axisXScale = d3.scale.ordinal()	
+		.domain(data.map(d => d.letter))
+		.range(data.map((d, i) => (barXMargin + i * (barWidth + barXMargin) + barWidth/2)));
+
+	var axisX = d3.svg.axis()
+		.scale(axisXScale);
+	var axisY = d3.svg.axis()
+		.scale(scaleY)
+		.ticks(10, '%')
+		.orient('left');
 
 	innerArea.selectAll('rect')
 		.data(data)
@@ -40,7 +51,7 @@ function plotChart(error, data) {
 		.append('rect')
 		.attr('x', d => scaleX(d.letter))
 		.attr('y', d => scaleY(d.frequency))
-		.attr('width', scaleX.rangeBand()) //*** width depending on scale bands
+		.attr('width', barWidth) //*** width depending on scale bands
 		.attr('height', d => height - scaleY(d.frequency))
 		.style('fill', 'steelblue');
 
