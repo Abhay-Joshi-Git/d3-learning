@@ -65,8 +65,12 @@ function plotChart(data) {
 	innerArea.append('g')
 		.call(axisY);	
 
+
+
 	//add path
-	innerArea.append('path')
+	innerArea.append('g')
+		.transition()
+		.append('path')
 		.datum(data)
 		.attr('stroke', 'steelblue')
 		.attr('fill', 'none')
