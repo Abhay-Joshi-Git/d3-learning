@@ -22,7 +22,12 @@ var scaleY = d3.scale.linear()
 
 //axis
 var axisX = d3.svg.axis()
-	.scale(scaleX);
+	.scale(scaleX)
+	.orient('bottom')
+	//.tickPadding(10);
+	// .innerTickSize(-height)
+ //    .outerTickSize(1)
+ //    .tickPadding(5)
 var axisY = d3.svg.axis()
 	.scale(scaleY)
 	.orient('left');		//had missed this
@@ -63,6 +68,7 @@ var data;
 var counter = 0;
 const transitionDuration = 3000;
 var XaxisGroup;
+var intervalId;
 
 function plotChart(chartData) {
 	data = chartData;
@@ -74,14 +80,21 @@ function plotChart(chartData) {
 
 	//add axis
 	XaxisGroup = innerArea.append('g')
+		.attr("clip-path", "url(#clip)")//**********
 		.attr('class', 'x-axis')
 		.attr('transform', 'translate(' + 0 + ',' + height + ')');
 
-	XaxisGroup.call(scaleX.axis =axisX
-				.ticks(d3.time.month, 1)
-				.tickFormat(d3.time.format('%m%y'))
+		
+	XaxisGroup.call(scaleX.axis = axisX
+				.ticks(d3.time.day, 1)
+				.tickFormat(d3.time.format('%d'))
+				//.tickSize(-height/2, 0, 0)				
 		);
 		
+	XaxisGroup.selectAll('.line')
+		.style('stroke', 'black')
+		.style('opacity', '0.7')
+
 
 	innerArea.select('.y-axis').remove();
 
@@ -93,7 +106,7 @@ function plotChart(chartData) {
 	if (!gPath) {		
 		gPath = innerArea
 			.append('g')
-			.attr("clip-path", "url(#clip)")
+			.attr("clip-path", "url(#clip)")//**********
 			.append('path');
 
 		gPath.datum(data)
@@ -103,8 +116,13 @@ function plotChart(chartData) {
 			.transition()
     		.duration(transitionDuration)
     		.ease(d3.ease('linear'))
-    		.each("start", tick);
+    		//.each("start", tick);
 	}
+
+	intervalId = setInterval(function() {
+		tick();
+	}, 5000);
+
 }
  
 d3.tsv('data_1.tsv', format, plotChart);
@@ -131,23 +149,55 @@ function tick() {
 
 	//update scale
 	scaleX.domain(d3.extent(data, d => d.date));
-	XaxisGroup.call(scaleX.axis);
+	
+
+	XaxisGroup.transition()
+	    .duration(3750)
+        .ease('linear')
+        .call(axisX);//******
 
 	// Redraw the line.
-	d3.select(this)
+	gPath
 		.attr("d", line)
       	.attr("transform", null);
 
+    //******  	
 	var transition = gPath
 		.transition()
-		.duration(500)
+		.duration(3750)
     	.ease(d3.ease('linear'))
 		.attr("transform", "translate(" + scaleX(prevDay) + ",0)")
 
 	if (counter < 1000) {
 		//here we are using 'end' as otherwise it was happening almost immediately
-		transition.each("end", tick);
+		//transition.each("end", tick);
+	} else {
+		clearInterval(intervalId);
 	}
 
 	data.shift();
+}
+
+function drawCircles(data) {
+	 //    var circleData = data.slice(1, data.length);
+
+ //    console.log(data[data.length-1], circleData[circleData.length-1]);    
+
+ //    var circlesAll = innerArea.selectAll('circle')
+ //    var circles	= circlesAll.data(circleData, d => d.date + d.close);
+
+ //    circles.enter()
+ //    	.append('circle')
+ //    	.attr('cx', d => scaleX(d.date))
+ //    	.attr('cy', d => scaleY(d.close))
+ //    	.attr('r', 3)
+ //    	.attr('fill', 'red');
+
+ //    circles
+ //    	//.selectAll('circle')
+ //    	.attr('cx', d => scaleX(d.date))
+ //    	.attr('cy', d => scaleY(d.close));
+
+	// circles.exit().remove();
+
 }
