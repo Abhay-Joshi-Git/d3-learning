@@ -24,10 +24,6 @@ var scaleY = d3.scale.linear()
 var axisX = d3.svg.axis()
 	.scale(scaleX)
 	.orient('bottom')
-	//.tickPadding(10);
-	// .innerTickSize(-height)
- //    .outerTickSize(1)
- //    .tickPadding(5)
 var axisY = d3.svg.axis()
 	.scale(scaleY)
 	.orient('left');		//had missed this
@@ -76,28 +72,18 @@ function plotChart(chartData) {
 	scaleX.domain(d3.extent(data, d => d.date));
 	scaleY.domain([0, 200]);
 
-	innerArea.select('.x-axis').remove();
-
 	//add axis
 	XaxisGroup = innerArea.append('g')
 		.attr("clip-path", "url(#clip)")//**********
 		.attr('class', 'x-axis')
 		.attr('transform', 'translate(' + 0 + ',' + height + ')');
-
 		
 	XaxisGroup.call(scaleX.axis = axisX
 				.ticks(d3.time.day, 1)
 				.tickFormat(d3.time.format('%d'))
-				//.tickSize(-height/2, 0, 0)				
 		);
 		
-	XaxisGroup.selectAll('.line')
-		.style('stroke', 'black')
-		.style('opacity', '0.7')
-
-
 	innerArea.select('.y-axis').remove();
-
 	innerArea.append('g')
 		.attr('class', 'y-axis')
 		.call(axisY);	
@@ -113,14 +99,14 @@ function plotChart(chartData) {
 			.attr('fill', 'none')
 			.attr('stroke', 'steelblue')
 			.attr('d', line)
-			.transition()
-    		.duration(transitionDuration)
-    		.ease(d3.ease('linear'))
-    		//.each("start", tick);
 	}
 
 	intervalId = setInterval(function() {
+		counter++;
 		tick();
+		if (counter > 100) {
+			clearInterval(intervalId);
+		}
 	}, 5000);
 
 }
@@ -138,7 +124,6 @@ function nextData(data) {
 
 
 function tick() {
-	counter++;
 
     //cal prevDay	
     var leftMostDate = d3.min(data, d => d.date);
@@ -148,8 +133,7 @@ function tick() {
 	data.push(nextData(data[data.length - 1])); 
 
 	//update scale
-	scaleX.domain(d3.extent(data, d => d.date));
-	
+	scaleX.domain(d3.extent(data, d => d.date));	
 
 	XaxisGroup.transition()
 	    .duration(3750)
@@ -162,42 +146,11 @@ function tick() {
       	.attr("transform", null);
 
     //******  	
-	var transition = gPath
+	gPath
 		.transition()
 		.duration(3750)
     	.ease(d3.ease('linear'))
-		.attr("transform", "translate(" + scaleX(prevDay) + ",0)")
-
-	if (counter < 1000) {
-		//here we are using 'end' as otherwise it was happening almost immediately
-		//transition.each("end", tick);
-	} else {
-		clearInterval(intervalId);
-	}
+		.attr("transform", "translate(" + scaleX(prevDay) + ",0)");
 
 	data.shift();
-}
-
-function drawCircles(data) {
-	 //    var circleData = data.slice(1, data.length);
-
- //    console.log(data[data.length-1], circleData[circleData.length-1]);    
-
- //    var circlesAll = innerArea.selectAll('circle')
- //    var circles	= circlesAll.data(circleData, d => d.date + d.close);
-
- //    circles.enter()
- //    	.append('circle')
- //    	.attr('cx', d => scaleX(d.date))
- //    	.attr('cy', d => scaleY(d.close))
- //    	.attr('r', 3)
- //    	.attr('fill', 'red');
-
- //    circles
- //    	//.selectAll('circle')
- //    	.attr('cx', d => scaleX(d.date))
- //    	.attr('cy', d => scaleY(d.close));
-
-	// circles.exit().remove();
-
 }
